@@ -1,4 +1,4 @@
-This is based on the example found here: https://gist.github.com/clydebarrow/9d2cffd739cb844e9d6d5005fd29518d
+This is based on the example found here: https://gist.github.com/clydebarrow/9d2cffd739cb844e9d6d5005fd29518d and created by https://gist.github.com/clydebarrow
 
 But using a different LCD etc esp32-2424s012 ESP32C3 round 1.28" 240*240 IPS board with touchscreen, no code for touchscreen yet
 

@@ -1,1 +1,177 @@
+esphome:
+  name: esp32-2424s012-lvgl
+  friendly_name: esp32-2424s012-lvgl
 
+esp32:
+  board: esp32-c3-devkitm-1
+  framework:
+    type: esp-idf
+
+logger:
+  level: DEBUG
+  hardware_uart: USB_SERIAL_JTAG
+    
+external_components:
+ - source: github://clydebarrow/esphome@lvgl
+   components: [ rotary_encoder, ili9xxx, image, lvgl ] 
+
+spi:
+  clk_pin: GPIO6
+  mosi_pin: GPIO7
+  # interface: hardware
+
+output:
+  - platform: ledc
+    pin:
+      number: GPIO3
+    id: backlight_output
+
+light:
+  - platform: monochromatic
+    output: backlight_output
+    name: LCD Backlight
+    id: led
+    restore_mode: ALWAYS_ON
+    default_transition_length: 0s
+
+display:
+  - platform: ili9xxx
+    id: lcd_display
+    model: gc9a01a
+    data_rate: 80MHz
+    cs_pin: GPIO10
+    dc_pin: GPIO2
+    update_interval: never
+    auto_clear_enabled: false
+
+sensor:
+  - platform: rotary_encoder
+    name: "Rotary Encoder"
+    id: encoder
+    pin_a: 20
+    pin_b: 21
+    internal: true
+
+time:
+  - platform: homeassistant
+    id: time_comp
+
+binary_sensor:
+  - platform: gpio
+    id: pushbutton
+    name: Pushbutton
+    pin:
+      number: 8
+      inverted: true
+
+lvgl:
+  log_level: INFO
+  rotary_encoders:
+    sensor: encoder
+    binary_sensor: pushbutton
+    group: general
+  color_depth: 16
+  bg_color: 0x0F0F0F
+  text_font: unscii_8
+  align: center
+  style_definitions:
+    - id: date_style
+      text_font: unscii_8
+      align: center
+      text_color: 0x000000
+      bg_opa: cover
+      radius: 4
+      pad_all: 2
+  widgets:
+    - meter:
+        height: 240
+        width: 240
+        align: center
+        bg_color: 0
+        scales: # Color bars
+          angle_range: 360
+          rotation: 255
+          range_from: 0
+          range_to: 12
+          ticks:
+            width: 35
+            count: 13
+            length: 8
+          indicators:
+            - ticks:
+                local: true
+                start_value: 0
+                end_value: 12
+                color_start: 0xFF0000
+                color_end: 0x0000FF
+    - meter:
+        height: 240
+        width: 240
+        align: center
+        widgets:
+          - label:
+              styles: date_style
+              y: -20
+              text: !lambda |-
+                static const char * const day_names[] = {"SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"};
+                return day_names[id(time_comp).now().day_of_week-1];
+          - label:
+              styles: date_style
+              y: +20
+              text: !lambda |-
+                static const char * const mon_names[] = {"JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
+                static char date_buf[8];
+                auto now = id(time_comp).now();
+                snprintf(date_buf, sizeof(date_buf), "%s %2d", mon_names[now.month-1], now.day_of_month);
+                return date_buf;
+              
+        bg_opa: TRANSP
+        text_color: 0xFFFFFF
+        scales:
+          - ticks:
+              width: 1
+              count: 61
+              length: 10
+              color: 0xFFFFFF
+            range_from: 0
+            range_to: 60
+            angle_range: 360
+            rotation: 270
+            indicators:
+              - line:
+                  id: minute_hand
+                  value: !lambda |-
+                    return id(time_comp).now().minute;
+                  width: 3
+                  color: 0xE0E0E0
+                  r_mod: -1
+
+          - 
+            angle_range: 330
+            rotation: 300
+            range_from: 1
+            range_to: 12
+            ticks:
+              width: 1
+              count: 12
+              length: 1
+              major:
+                stride: 1
+                width: 4
+                length: 8
+                color: 0xC0C0C0
+                label_gap: 6
+
+          - angle_range: 360
+            rotation: 270
+            range_from: 0
+            range_to: 720
+            indicators:
+              - line:
+                  id: hour_hand
+                  value: !lambda |-
+                    auto now = id(time_comp).now();
+                    return std::fmod(now.hour, 12) * 60 + now.minute;
+                  width: 4
+                  color: 0xA0A0A0
+                  r_mod: -20

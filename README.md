@@ -1,6 +1,6 @@
 This is based on the example found here: https://gist.github.com/clydebarrow/9d2cffd739cb844e9d6d5005fd29518d and created by https://gist.github.com/clydebarrow
 
-The current LVGL dev code is here I belive https://github.com/clydebarrow/esphome/tree/75c5d5f19fe789053d47fa6874df0e03d5bf1015/esphome/components/lvgl
+The current LVGL dev code is here I believe https://github.com/clydebarrow/esphome/tree/75c5d5f19fe789053d47fa6874df0e03d5bf1015/esphome/components/lvgl
 
 Another example is here: https://gist.github.com/clydebarrow/3a3d7d48ee72c333d094e80ac43b8054
 

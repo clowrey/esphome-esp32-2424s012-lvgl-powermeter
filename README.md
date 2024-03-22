@@ -9,7 +9,8 @@ https://gist.github.com/clydebarrow/ef89e9a93bd44771483b9144ae9042a1
 
 But using a different LCD etc esp32-2424s012 ESP32C3 round 1.28" 240*240 IPS board with touchscreen, no code for touchscreen yet
 
-non-affiliate link to manufacturer store: https://www.aliexpress.us/item/3256805267200938.html
+non-affiliate link to product:
+https://www.aliexpress.us/item/3256806114329043.html
 
 ![esp32-2424s012_1 (Small)](https://github.com/clowrey/esphome-esp32-2424s012-lvgl-powermeter/assets/6935928/f7c1a190-99d1-4168-a0c7-906efd464e62)
 ![esp32-2424s012_2 (Small)](https://github.com/clowrey/esphome-esp32-2424s012-lvgl-powermeter/assets/6935928/6b1ba872-356d-426f-aa1e-d95ab732c966)

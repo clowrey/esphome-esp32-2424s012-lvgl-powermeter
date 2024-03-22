@@ -4,6 +4,9 @@ The current LVGL dev code is here I belive https://github.com/clydebarrow/esphom
 
 Another example is here: https://gist.github.com/clydebarrow/3a3d7d48ee72c333d094e80ac43b8054
 
+The most complete example from Clyde Barrow that I found a little later is here:
+https://gist.github.com/clydebarrow/ef89e9a93bd44771483b9144ae9042a1
+
 But using a different LCD etc esp32-2424s012 ESP32C3 round 1.28" 240*240 IPS board with touchscreen, no code for touchscreen yet
 
 non-affiliate link to manufacturer store: https://www.aliexpress.us/item/3256805267200938.html

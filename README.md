@@ -7,7 +7,7 @@ Another example is here: https://gist.github.com/clydebarrow/3a3d7d48ee72c333d09
 The most complete example from Clyde Barrow that I found a little later is here:
 https://gist.github.com/clydebarrow/ef89e9a93bd44771483b9144ae9042a1
 
-But using a different LCD etc esp32-2424s012 ESP32C3 round 1.28" 240*240 IPS board with touchscreen, no code for touchscreen yet
+I am using a different LCD from his examples, the esp32-2424s012 ESP32C3 round 1.28" 240*240 IPS board with touchscreen
 
 non-affiliate link to product:
 https://www.aliexpress.us/item/3256806114329043.html

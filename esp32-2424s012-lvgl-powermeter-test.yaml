@@ -1,0 +1,324 @@
+esphome:
+  name: esp32-2424s012-lvgl-powermeter-test
+  friendly_name: esp32-2424s012-lvgl-powermeter-test
+
+esp32:
+  board: esp32-c3-devkitm-1
+  framework:
+    type: arduino
+
+logger:
+  level: DEBUG
+  #hardware_uart: USB_SERIAL_JTAG
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: 
+
+ota:
+  password: 
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+captive_portal:
+    
+external_components:
+ - source: github://clydebarrow/esphome@lvgl
+   components: [ ili9xxx, image, lvgl ] 
+
+globals:
+  - id: time_counter
+    type: int
+    initial_value: '0'
+
+number:
+  - platform: template
+    initial_value: 0
+    id: counting_number
+    internal: True
+    min_value: -10
+    max_value: 10
+    step: 1
+    optimistic: True
+    
+sensor:
+  - platform: wifi_signal
+    # name: "WiFi Signal Sensor"
+    internal: True
+    id: wifi_signal_sensor
+    update_interval: 1s
+  - platform: uptime
+    id: uptime_counter
+    update_interval: 1s
+    accuracy_decimals: 0
+    on_raw_value:
+      then:
+        - light.turn_on:
+            id: back_light
+            brightness: 50%
+        - number.increment:
+            id: counting_number
+            cycle: True
+        - script.execute: update_display
+
+spi:
+  clk_pin: GPIO6
+  mosi_pin: GPIO7
+
+output:
+  - platform: ledc
+    pin:
+      number: GPIO3
+    id: backlight_output
+
+light:
+  - platform: monochromatic
+    output: backlight_output
+    name: LCD Backlight
+    id: back_light
+    restore_mode: ALWAYS_ON
+    #default_transition_length: 0s
+
+display:
+  - platform: ili9xxx
+    id: lcd_display
+    model: gc9a01a
+    data_rate: 80MHz
+    cs_pin: GPIO10
+    dc_pin: GPIO2
+    dimensions:
+      width: 240
+      height: 240
+    update_interval: never
+    auto_clear_enabled: false
+
+#time:
+#  - platform: homeassistant
+#    id: time_comp
+
+script:
+  - id: update_display
+    then:
+      - lvgl.indicator.line.update:
+          id: power_meter_input
+          value: !lambda return id(counting_number).state;
+      - lvgl.label.update:
+          id: battery_kw
+          text: !lambda |-
+            static char buf[8];
+            snprintf(buf, sizeof(buf), "%.1fkW", id(counting_number).state);
+            return buf;
+      - lvgl.label.update:
+          id: battery_status
+          text_color: 0xFF0000
+          #text: "charging"
+          text: "discharging"
+      - lvgl.label.update:
+          id: battery_soc
+          text: !lambda |-
+            static char buf[8];
+            snprintf(buf, sizeof(buf), "%.1f%%", id(counting_number).state);
+            return buf;
+      - lvgl.label.update:
+          id: solar_kw
+          text: !lambda |-
+            static char buf[8];
+            snprintf(buf, sizeof(buf), "%.1fkW", id(counting_number).state);
+            return buf;
+      - lvgl.img.update:
+          id: img_solar_power
+          src: solar_power_icon
+          img_recolor: 0xFFF000 #mixes this color with the base image
+          #img_recolor_opa: 100% #opacity defaults to 0% = must set this for recolor to take effect
+          #bg_color: 0xFFFFFF          
+
+i2c:
+  sda: 4
+  scl: 5
+  #scan: true
+  id: i2c_touch
+
+touchscreen:
+  platform: cst816
+  id: my_touchscreen
+  interrupt_pin: 0
+  reset_pin: 1
+  on_touch:
+    then:
+      lvgl.page.next:
+
+image:
+  - file: mdi:sun-wireless-outline
+    #"solar-power-invert.png"
+    # mdi:solar-power
+    # mdi:battery-charging-outline
+    # mdi:battery-arrow-up-outline
+    # mdi:battery-arrow-down-outline
+    id: solar_power_icon
+    resize: 50x50
+
+  - file: mdi:battery-arrow-down-outline
+    id: home_battery_icon
+    resize: 30x30
+
+lvgl:
+  touchscreens: my_touchscreen
+  log_level: INFO
+  color_depth: 16
+  bg_color: 0
+  border_width: 0
+  outline_width: 0
+  shadow_width: 0
+  text_font: unscii_16
+  align: center
+  style_definitions:
+    - id: meter_style
+      text_font: unscii_8
+      #state_default: null
+    - id: font_style
+      text_font: MONTSERRAT_24
+      #text_font: unscii_16
+      align: center
+      text_color: 0xFFFFFF
+      #bg_opa: cover
+      bg_opa: TRANSP
+      bg_color: 0
+      radius: 4
+      pad_all: 2 
+  page_wrap: true
+  pages:
+    - id: main_page
+      widgets:
+        - obj: # Meter
+            height: 240 # needed to be explicitily defined for my round display to not have weird corder line overlappting gauge
+            width: 240
+            #bg_opa: TRANSP
+            bg_color: 0
+            border_width: 0
+            outline_width: 0
+            shadow_width: 0
+            pad_all: 4
+            align: center
+            #scrollbar_mode: "off"
+            widgets:
+              - meter: # Gradient color  arc
+                  height: 100%
+                  width: 100%
+                  border_width: 0
+                  outline_width: 0
+                  align: center
+                  bg_color: 0
+                  styles: meter_style
+                  #bg_opa: TRANSP
+                  scales:
+                    angle_range: 180 # sets the total angle to 180 = starts mid left and ends mid right
+                    range_to: 10
+                    range_from: -10
+                    ticks:
+                      count: 0
+
+                    indicators:
+                      - line:
+                          id: power_meter_input
+                          width: 8
+                          color: 0xFFFFFF
+                          r_mod: 12 #sets line length by this much difference from the scale default radius
+                          value: 50
+                      - img:
+                          id: power_meter_input_img
+                      - arc:
+                          color: 0xFF3000
+                          r_mod: 10 #radius difference from the scale default radius
+                          width: 20
+                          start_value: -10
+                          end_value: 0
+                      - arc:
+                          color: 0x00FF00
+                          r_mod: 10 #radius difference from the scale default radius
+                          width: 20
+                          start_value: 0
+                          end_value: 10
+              #- canvas:
+              - arc: # black arc to erase middle part of meter indicator line
+                  height: 170
+                  width: 170
+                  align: center
+                  arc_color: 0x000000 # background color
+                  arc_width: 150
+                  start_angle: 0
+                  end_angle: 360
+                  indicator:
+                    arc_width: 150
+                    arc_color: 0x000000
+              - label: # gauge lower and higher range indicators
+                  styles: font_style
+                  text_font: MONTSERRAT_18 # override font size
+                  y: 8 #negative = higher
+                  x: -99
+                  text: "-10"
+              - label:
+                  styles: font_style
+                  text_font: MONTSERRAT_18 # override font size
+                  y: 8 #negative = higher
+                  x: 99
+                  text: "+10"
+              - label:
+                  styles: font_style
+                  id: battery_status
+                  y: -35 #negative = higher
+              - label:
+                  styles: font_style
+                  id: battery_kw
+                  y: -60
+              - label:
+                  styles: font_style
+                  text_font: MONTSERRAT_40 # override font size
+                  id: battery_soc
+                  y: 0
+              - label:
+                  styles: font_style
+                  id: solar_kw
+                  text_color: 0xFFFF00
+                  y: 90
+              #- img:
+              #    src: home_battery_icon
+                  #id: img_solar_power
+                  #align: center
+                  #img_recolor: 0xFFFFFF
+                  #img_recolor_opa: 100% #opacity defaults to 0% = must set this for recolor to take effect
+                  #bg_color: 0xFFFFFF
+                  #y: -35
+                  #x: -60
+              - img:
+                  src: solar_power_icon
+                  id: img_solar_power
+                  align: center
+                  img_recolor: 0xFFFF00
+                  img_recolor_opa: 100% #opacity defaults to 0% = must set this for recolor to take effect
+                  #bg_color: 0xFFFFFF
+                  y: 50
+                  #x: -60
+    - id: page1
+      height: 240 # needed to be explicitily defined for my round display to not have weird corder line overlappting gauge
+      width: 240
+      #bg_opa: TRANSP
+      bg_color: 0
+      border_width: 0
+      outline_width: 0
+      shadow_width: 0
+      pad_all: 4
+      align: center
+      #scrollbar_mode: "off"
+      widgets:
+        - label:
+            styles: font_style
+            text_font: MONTSERRAT_18 # override font size
+            y: 0 #negative = higher
+            x: 0
+            text: "Settings Page"
+
+
+

@@ -2,6 +2,16 @@ This is based on the example found here: https://gist.github.com/clydebarrow/9d2
 
 The current LVGL dev code is here I believe https://github.com/clydebarrow/esphome/tree/75c5d5f19fe789053d47fa6874df0e03d5bf1015/esphome/components/lvgl
 
+While this is still under active development it is best to reference a previous working commit like this:
+```yaml
+external_components:
+  - source:
+      type: git
+      url: https://github.com/clydebarrow/esphome
+      ref: fd15094c0860df23d532881df36cfd16c7da1091 #previous commit - wont be needed in the future
+    components: [ lvgl ]
+```
+
 LVGL Docs: https://deploy-preview-3678--esphome.netlify.app/components/lvgl#lvgl-main
 
 LVGL tips and tricks: https://deploy-preview-3678--esphome.netlify.app/cookbook/lvgl

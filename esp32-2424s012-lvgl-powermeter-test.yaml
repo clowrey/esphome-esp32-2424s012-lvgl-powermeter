@@ -26,8 +26,11 @@ wifi:
 captive_portal:
     
 external_components:
- - source: github://clydebarrow/esphome@lvgl
-   components: [ ili9xxx, image, lvgl ] 
+  - source:
+      type: git
+      url: https://github.com/clydebarrow/esphome
+      ref: fd15094c0860df23d532881df36cfd16c7da1091 #previous commit - wont be needed in the future
+    components: [ lvgl ]
 
 globals:
   - id: time_counter

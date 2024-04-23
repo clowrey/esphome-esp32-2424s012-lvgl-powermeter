@@ -23,8 +23,8 @@ https://gist.github.com/clydebarrow/ef89e9a93bd44771483b9144ae9042a1
 
 I am using a different LCD from his examples, the esp32-2424s012 ESP32C3 round 1.28" 240*240 IPS board with touchscreen
 
-non-affiliate link to product:
-https://www.aliexpress.us/item/3256806114329043.html
+affiliate link to product:
+[https://www.aliexpress.us/item/3256806114329043.html](https://s.click.aliexpress.com/e/_DeAb5Zz)
 
 Disclaimer: my examples are by no means the best or right way to do things - I am still in the early stages of learning LVGL and specifically the ESPHome syntax for LVGL component
 

@@ -12,8 +12,11 @@ logger:
   hardware_uart: USB_SERIAL_JTAG
     
 external_components:
- - source: github://clydebarrow/esphome@lvgl
-   components: [ rotary_encoder, ili9xxx, image, lvgl ] 
+  - source:
+      type: git
+      url: https://github.com/clydebarrow/esphome
+      ref: fd15094c0860df23d532881df36cfd16c7da1091 #previous commit - wont be needed in the future
+    components: [ lvgl ]
 
 spi:
   clk_pin: GPIO6
